@@ -24,3 +24,12 @@ def insert_data(client_name, residence, arm_length, shoulder_length):
     cursor.execute("INSERT INTO users (client_name, residence, arm_length, shoulder_length) VALUES (?, ?, ?)", (client_name, residence, arm_length, shoulder_length))
     conn.commit()
     conn.close()    
+
+# Function to search for user data by name
+def search_data(client_name):
+    conn = sqlite3.connect("user_data.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE name=?", (client_name))
+    data = cursor.fetchall()
+    conn.close()
+    return data
