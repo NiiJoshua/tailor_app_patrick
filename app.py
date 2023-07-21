@@ -9,7 +9,6 @@ def create_table():
                    CREATE TABLE IF NOT EXISTS users (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         client_name TEXT,
-                        residence TEXT,
                         arm_length INTEGER,
                         shoulder_length INTEGER
                    )
@@ -18,10 +17,10 @@ def create_table():
     conn.close()
 
 # Function to insert user data into database
-def insert_data(client_name, residence, arm_length, shoulder_length):
+def insert_data(client_name, arm_length, shoulder_length):
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO users (client_name, residence, arm_length, shoulder_length) VALUES (?, ?, ?)", (client_name, residence, arm_length, shoulder_length))
+    cursor.execute("INSERT INTO users (client_name, arm_length, shoulder_length) VALUES (?, ?, ?)", (client_name, arm_length, shoulder_length))
     conn.commit()
     conn.close()    
 
@@ -29,7 +28,7 @@ def insert_data(client_name, residence, arm_length, shoulder_length):
 def search_data(client_name):
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE name=?", (client_name))
+    cursor.execute("SELECT client_name, arm_length, shoulder_length FROM users WHERE client_name=?", (client_name,))
     data = cursor.fetchall()
     conn.close()
     return data
@@ -47,25 +46,27 @@ def main():
 
         # Input fields 
         client_name = st.text_input("Name of Cleint")
-        residence = st.text_input("Where does the client live")
-        arm_length = st.number_input("arm_length (in cm)", min_value=0, step=1)
-        shoulder_length = st.number_input("Height (in cm)", min_value=0, step=1)
+        arm_length = st.number_input("arm_length (in cm)")
+        shoulder_length = st.number_input("shoulder_length (in cm)")
 
         # Submit button to record user information
         if st.button("Submit"):
             create_table()  # Create the table if it doesn't exist
-            insert_data(client_name, residence, arm_length, shoulder_length)
+            insert_data(client_name, arm_length, shoulder_length)
             st.success("User information recorded successfully!")
 
     # Search data by name
-    if mode == 'Input Data':
+    if mode == 'Search Record':
+        st.header("Client Data Search")
+        st.write("Enter user information below:")
+
         search_name = st.text_input("Search User by Name")
         if st.button("Search"):
             data = search_data(search_name)
             if data:
                 st.write("User Information:")
                 for user in data:
-                    st.write(f"Name: {user[0]}, arm_length: {user[3]}, shoulder_length: {user[3]}")
+                    st.write(f"Name: {user[0]}, arm_length: {user[1]}, shoulder_length: {user[2]}")
             else:
                 st.write("No user found with the given name.")
 
