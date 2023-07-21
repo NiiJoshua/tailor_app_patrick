@@ -14,3 +14,13 @@ def create_table():
                         shoulder_length INTEGER
                    )
                    """)
+    conn.commit()
+    conn.close()
+
+# Function to insert user data into database
+def insert_data(client_name, residence, arm_length, shoulder_length):
+    conn = sqlite3.connect("user_data.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO users (client_name, residence, arm_length, shoulder_length) VALUES (?, ?, ?)", (client_name, residence, arm_length, shoulder_length))
+    conn.commit()
+    conn.close()    
