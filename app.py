@@ -7,12 +7,12 @@ def create_table():
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
     cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS records (
+                   CREATE TABLE IF NOT EXISTS rec (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         name TEXT,
                         chest FLOAT,
                         shoulder FLOAT,
-                        sleeve FLOAT,
+                        sleeve_length FLOAT,
                         neck FLOAT,
                         stomach FLOAT,
                         around_arm FLOAT,
@@ -22,7 +22,7 @@ def create_table():
                         waist FLOAT,
                         thigh FLOAT,
                         knee FLOAT,
-                        button FLOAT,
+                        bass FLOAT,
                         length FLOAT,
                         waist_to_knee FLOAT 
                    )
@@ -31,10 +31,10 @@ def create_table():
     conn.close()
 
 # Function to insert user data into database
-def insert_data(name, chest, shoulder, sleeve, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, button, length, waist_to_knee):
+def insert_data(name, chest, shoulder, sleeve_length, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee):
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO records (name, chest, shoulder, sleeve, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, button, length, waist_to_knee) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (name, chest, shoulder, sleeve, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, button, length, waist_to_knee))
+    cursor.execute("INSERT INTO rec (name, chest, shoulder, sleeve_length, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (name, chest, shoulder, sleeve_length, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee))
     conn.commit()
     conn.close()    
 
@@ -42,9 +42,9 @@ def insert_data(name, chest, shoulder, sleeve, neck, stomach, around_arm, shirt_
 def search_data(name):
     conn = sqlite3.connect("user_data.db")
     # cursor = conn.cursor()
-    # cursor.execute("SELECT name, chest, shoulder, sleeve, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, button, length, waist_to_knee FROM records WHERE name=?", (name,))
+    # cursor.execute("SELECT name, chest, shoulder, sleeve, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee FROM rec WHERE name=?", (name,))
     # data = cursor.fetchall()
-    query = f"SELECT * FROM records WHERE name LIKE '%{name}%'"
+    query = f"SELECT * FROM rec WHERE name LIKE '%{name}%'"
     record_df = pd.read_sql_query(query, conn)
     conn.close()
     return record_df
@@ -52,25 +52,32 @@ def search_data(name):
 # Function to retrieve all user data
 def all_users():
     conn = sqlite3.connect("user_data.db")
-    records_df = pd.read_sql_query("SELECT * FROM records ORDER BY name DESC", conn)
+    rec_df = pd.read_sql_query("SELECT * FROM rec ORDER BY name DESC", conn)
     conn.close()
-    return records_df
+    return rec_df
 
 # Function to delete a record
 def delete_a_record(id):
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM records WHERE id=?", (id,))
+    cursor.execute("DELETE FROM rec WHERE id=?", (id,))
     conn.commit()
     conn.close()
 
 # Function to delete all records
-def delete_all_records():
+def delete_all_rec():
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM records;",)
+    cursor.execute("DELETE FROM rec;",)
     conn.commit()
     conn.close()
+
+# Function to run custom query
+def run_custom_query(query):
+    conn = sqlite3.connect("user_data.db")
+    rec_df = pd.read_sql_query(query, conn)
+    conn.close()
+    return rec_df
 
 # Confirm dialog
 def confirm_dialog():
@@ -84,7 +91,7 @@ def main():
         # st.write("Welcome to 2DP Clothing")
         st.image('2dp.jpg')
 
-    mode = st.sidebar.radio('What do you want to do?',['Input Data', 'Search Record','See all Records', 'Delete a Record','Delete all Records'])
+    mode = st.sidebar.radio('What do you want to do?',['Input Data', 'Search Record','See all Records', 'Delete a Record', 'Run Custom Query'])
 
     if mode == 'Input Data':
         st.header(":orange[Welcome to 2DP Clothing]")
@@ -95,7 +102,7 @@ def main():
         name = st.text_input("Name of Cleint")
         chest = st.number_input("Chest (inches)")
         shoulder = st.number_input("Shoulder (inches)")
-        sleeve = st.number_input("Sleeve (inches)")
+        sleeve_length = st.number_input("Sleeve Length (inches)")
         neck = st.number_input("Neck (inches)")
         stomach = st.number_input("Stomach (inches)")
         around_arm = st.number_input("Around arm (inches)")
@@ -105,31 +112,31 @@ def main():
         waist = st.number_input("Waist (inches)")
         thigh = st.number_input("thigh (inches)")
         knee = st.number_input("Knee (inches)")
-        button = st.number_input("Button (inches)")
+        bass = st.number_input("bass (inches)")
         length = st.number_input("Trouser Length (inches)")
         waist_to_knee = st.number_input("Waist to knee (inches)")
 
 
-        # Display records
+        # Display Records
         st.write("\nInformation you've entered. Please be sure it is right before you hit the submit button")
         st.subheader(":orange[Shirt / Top]")
 
         st.write(f"Name: {name}")
-        st.write(f"Chest: {chest}")
-        st.write(f"Shoulder: {shoulder}")
-        st.write(f"Sleeve: {sleeve}")
-        st.write(f"Neck: {neck}")
-        st.write(f"Stomach: {stomach}")
-        st.write(f"Around arm : {around_arm}")
-        st.write(f"Shirt  length: {shirt_length}")
-        st.write(f"Cuff : {cuff}")
-        st.write(f"Hip: {hip}")
+        st.write(f"Chest: {round(chest,3)}")
+        st.write(f"Shoulder: {round(shoulder,3)}")
+        st.write(f"Sleeve Length: {round(sleeve_length,3)}")
+        st.write(f"Neck: {round(neck,3)}")
+        st.write(f"Stomach: {round(stomach,3)}")
+        st.write(f"Around arm : {round(around_arm,3)}")
+        st.write(f"Shirt  length: {round(shirt_length,3)}")
+        st.write(f"Cuff : {round(cuff,3)}")
+        st.write(f"Hip: {round(hip,3)}")
 
         st.subheader(":orange[Trouser]")
         st.write(f"Waist: {waist}")
         st.write(f"Thigh: {thigh}")
         st.write(f"Knee: {knee}")
-        st.write(f"Button: {button}")
+        st.write(f"bass: {bass}")
         st.write(f"Trouser length: {length}")
         st.write(f"Waist to knee: {waist_to_knee}")
         
@@ -137,7 +144,7 @@ def main():
         # Submit button to record user information
         if st.button("submit"):
             create_table()  # Create the table if it doesn't exist
-            insert_data(name, chest, shoulder, sleeve, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, button, length, waist_to_knee)
+            insert_data(name, chest, shoulder, sleeve_length, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee)
             st.success("User information recorded successfully!")
 
     # Search data by name
@@ -158,8 +165,8 @@ def main():
         st.title(":orange[Client Data Search]")
         st.header("Displaying all records")
         if st.button("See all records"):
-            records = all_users()
-            st.dataframe(records)
+            rec = all_users()
+            st.dataframe(rec)
 
     # Delete a record
     if mode == 'Delete a Record':
@@ -173,14 +180,28 @@ def main():
             delete_a_record(record_id)
             st.success("Record deleted successfully!")
             
-    # Delete all records
-    if mode == 'Delete all Records':
-        st.title(":orange[Delete all records]")
-        st.warning("Are you sure you want to delete all records?")
+    # Delete all rec
+    # if mode == 'Delete all rec':
+        # st.title(":orange[Delete all rec]")
+        # st.warning("Are you sure you want to delete all rec?")
         
-        if st.button("Delete all records"):
-            delete_all_records()
-            st.success("All Records deleted successfully!")
+        # if st.button("Delete all rec"):
+        #     delete_all_rec()
+        #     st.success("All rec deleted successfully!")
+
+    # Run Custom query
+    if mode == 'Run Custom Query':
+        st.title(":orange[Run Custom Query]")
+        st.warning("This is reserved for admin only!")
+        query = st.text_area("Enter Custom SQL Query")
+        
+        if st.button("Run Query"):
+            try:
+                query_results = run_custom_query(query)
+                st.dataframe(query_results)
+            except Exception as e:
+                st.error(f"Error executing the query: {e}")
+            
         
 
 if __name__ == "__main__":
