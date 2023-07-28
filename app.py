@@ -2,29 +2,30 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 
+# used dbs: records, rec, test_rec
 # Function to create a database table
 def create_table():
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
     cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS rec (
+                   CREATE TABLE IF NOT EXISTS test_rec (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         name TEXT,
                         chest FLOAT,
                         shoulder FLOAT,
-                        sleeve_length FLOAT,
+                        sleeve_length TEXT,
                         neck FLOAT,
                         stomach FLOAT,
                         around_arm FLOAT,
-                        shirt_length FLOAT,
+                        shirt_length TEXT,
                         cuff FLOAT,
                         hip FLOAT,
                         waist FLOAT,
                         thigh FLOAT,
-                        knee FLOAT,
+                        knee TEXT,
                         bass FLOAT,
                         length FLOAT,
-                        waist_to_knee FLOAT 
+                        waist_to_knee TEXT 
                    )
                    """)
     conn.commit()
@@ -34,25 +35,51 @@ def create_table():
 def insert_data(name, chest, shoulder, sleeve_length, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee):
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO rec (name, chest, shoulder, sleeve_length, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (name, chest, shoulder, sleeve_length, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee))
+    cursor.execute("INSERT INTO test_rec (name, chest, shoulder, sleeve_length, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (name, chest, shoulder, sleeve_length, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee))
     conn.commit()
     conn.close()    
 
 # Function to search for user data by name
 def search_data(name):
     conn = sqlite3.connect("user_data.db")
-    # cursor = conn.cursor()
-    # cursor.execute("SELECT name, chest, shoulder, sleeve, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee FROM rec WHERE name=?", (name,))
-    # data = cursor.fetchall()
-    query = f"SELECT * FROM rec WHERE name LIKE '%{name}%'"
-    record_df = pd.read_sql_query(query, conn)
+    cursor = conn.cursor()
+    query = f"SELECT * FROM test_rec WHERE name LIKE '%{name}%'"
+    # record_df = pd.read_sql_query(query, conn)
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    if not results:
+        st.write("Client Not Found")
+    else:
+        record = results[0]
+        st.subheader(":orange[Shirt / Top]")
+
+        st.write("Name:", record[1])
+        st.write("Chest:", record[2])
+        st.write("Shoulder:", record[3])
+        st.write("Sleeve Length:", record[4])
+        st.write("Neck:", record[5])
+        st.write("Stomach:", record[6])
+        st.write("Around arm:", record[7])
+        st.write("Shirt  length:", record[8])
+        st.write("Cuff:", record[9])
+        st.write("Hip:", record[10])
+
+        st.subheader(":orange[Trouser]")
+        st.write("Waist:", record[11])
+        st.write("Thigh:", record[12])
+        st.write("Knee:", record[13])
+        st.write("bass:", record[14])
+        st.write("Trouser length:", record[15])
+        st.write("Waist to knee:", record[16])
+
     conn.close()
-    return record_df
+    # return record_df
 
 # Function to retrieve all user data
 def all_users():
     conn = sqlite3.connect("user_data.db")
-    rec_df = pd.read_sql_query("SELECT * FROM rec ORDER BY name DESC", conn)
+    rec_df = pd.read_sql_query("SELECT * FROM test_rec ORDER BY name DESC", conn)
     conn.close()
     return rec_df
 
@@ -60,7 +87,7 @@ def all_users():
 def delete_a_record(id):
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM rec WHERE id=?", (id,))
+    cursor.execute("DELETE FROM test_rec WHERE id=?", (id,))
     conn.commit()
     conn.close()
 
@@ -68,7 +95,7 @@ def delete_a_record(id):
 def delete_all_rec():
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM rec;",)
+    cursor.execute("DELETE FROM test_rec;",)
     conn.commit()
     conn.close()
 
@@ -102,19 +129,19 @@ def main():
         name = st.text_input("Name of Cleint")
         chest = st.number_input("Chest (inches)")
         shoulder = st.number_input("Shoulder (inches)")
-        sleeve_length = st.number_input("Sleeve Length (inches)")
+        sleeve_length = st.text_input("Sleeve Length (inches)")
         neck = st.number_input("Neck (inches)")
         stomach = st.number_input("Stomach (inches)")
         around_arm = st.number_input("Around arm (inches)")
-        shirt_length = st.number_input("Shirt length (inches)")
+        shirt_length = st.text_input("Shirt length (inches)")
         cuff = st.number_input("Cuff (inches)")
         hip = st.number_input("Hip (inches)")
         waist = st.number_input("Waist (inches)")
         thigh = st.number_input("thigh (inches)")
-        knee = st.number_input("Knee (inches)")
+        knee = st.text_input("Knee (inches)")
         bass = st.number_input("bass (inches)")
         length = st.number_input("Trouser Length (inches)")
-        waist_to_knee = st.number_input("Waist to knee (inches)")
+        waist_to_knee = st.text_input("Waist to knee (inches)")
 
 
         # Display Records
@@ -124,11 +151,11 @@ def main():
         st.write(f"Name: {name}")
         st.write(f"Chest: {round(chest,3)}")
         st.write(f"Shoulder: {round(shoulder,3)}")
-        st.write(f"Sleeve Length: {round(sleeve_length,3)}")
+        st.write(f"Sleeve Length: {sleeve_length}")
         st.write(f"Neck: {round(neck,3)}")
         st.write(f"Stomach: {round(stomach,3)}")
         st.write(f"Around arm : {round(around_arm,3)}")
-        st.write(f"Shirt  length: {round(shirt_length,3)}")
+        st.write(f"Shirt  length: {shirt_length}")
         st.write(f"Cuff : {round(cuff,3)}")
         st.write(f"Hip: {round(hip,3)}")
 
@@ -142,7 +169,7 @@ def main():
         
 
         # Submit button to record user information
-        if st.button("submit"):
+        if st.button(":orange[submit]"):
             create_table()  # Create the table if it doesn't exist
             insert_data(name, chest, shoulder, sleeve_length, neck, stomach, around_arm, shirt_length, cuff, hip, waist, thigh, knee, bass, length, waist_to_knee)
             st.success("User information recorded successfully!")
@@ -155,10 +182,10 @@ def main():
         name = st.text_input("Search records by Name")
         if st.button("Search"):
             record_df = search_data(name)
-            if not record_df.empty:
-                st.dataframe(record_df)
-            else:
-                st.warning("Record not found")
+            # if not record_df.empty:
+                # st.dataframe(record_df)
+            # else:
+                # st.warning("Record not found")
 
     # See all records
     if mode == 'See all Records':
